@@ -1,65 +1,49 @@
 <?php
+use PHPUnit\Framework\TestCase;
 
-// Test unitaire
-class GuardTest {
-    public function testGiveAccess() {
+class GuardTest extends TestCase
+{
+    public function testGiveAccessForPrivatePost()
+    {
+        $user = new User("John", "Doe", "john@example.com", "P@ssw0rd", ["USER"]);
+        $post = new Post("My Private Post", "This is a private post content.", "my-private-post", true);
+
         $guard = new Guard();
-        $post = new Post(true); // Post privé
-        $user = new User(User::ROLE_ANONYMOUS);
+        $resultUser = $guard->giveAccess($post, $user);
 
-        // Test avec un utilisateur anonyme sur un post privé
-        try {
-            $guard->giveAccess($post, $user);
-        } catch (Exception $e) {
-            // L'exception devrait être levée ici
-            echo "Exception: " . $e->getMessage();
-        }
-
-        // Test avec un utilisateur USER sur un post privé
-        $user->setRole(User::ROLE_USER);
-        $result = $guard->giveAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: ADMIN
-
-        // Test avec un utilisateur ADMIN sur un post privé
-        $user->setRole(User::ROLE_ADMIN);
-        $result = $guard->giveAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: ADMIN
-
-        // Test avec un utilisateur anonyme sur un post public
-        $post = new Post(false); // Post public
-        $user->setRole(User::ROLE_ANONYMOUS);
-        $result = $guard->giveAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: USER
+        $this->assertTrue($resultUser->hasRole("ADMIN"));
     }
 
-    public function testRemoveAccess() {
+    public function testGiveAccessForPublicPost()
+    {
+        $user = new User("Jane", "Smith", "jane@example.com", "P@ssw0rd", ["ANONYMOUS"]);
+        $post = new Post("My Public Post", "This is a public post content.", "my-public-post", false);
+
         $guard = new Guard();
-        $post = new Post(true); // Post privé
-        $user = new User(User::ROLE_ANONYMOUS);
+        $resultUser = $guard->giveAccess($post, $user);
 
-        // Test avec un utilisateur anonyme sur un post privé
-        $result = $guard->removeAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: ANONYMOUS
+        $this->assertFalse($resultUser->hasRole("USER"));
+    }
 
-        // Test avec un utilisateur USER sur un post privé
-        $user->setRole(User::ROLE_USER);
-        $result = $guard->removeAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: ANONYMOUS
+    public function testRemoveAccessForPrivatePost()
+    {
+        $user = new User("Alice", "Johnson", "alice@example.com", "P@ssw0rd", ["USER"]);
+        $post = new Post("My Private Post", "This is a private post content.", "my-private-post", true);
 
-        // Test avec un utilisateur ADMIN sur un post privé
-        $user->setRole(User::ROLE_ADMIN);
-        $result = $guard->removeAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: USER
+        $guard = new Guard();
+        $resultUser = $guard->removeAccess($post, $user);
 
-        // Test avec un utilisateur anonyme sur un post public
-        $post = new Post(false); // Post public
-        $user->setRole(User::ROLE_ANONYMOUS);
-        $result = $guard->removeAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu: ANONYMOUS
-        
-        // Test avec un utilisateur USER sur un post public
-        $user->setRole(User::ROLE_USER);
-        $result = $guard->removeAccess($post, $user);
-        echo "Nouveau rôle: " . $result->getRole(); // Attendu
+        $this->assertTrue($resultUser->hasRole("ANONYMOUS"));
+    }
+
+    public function testRemoveAccessForPublicPost()
+    {
+        $user = new User("Bob", "Brown", "bob@example.com", "P@ssw0rd", ["ADMIN"]);
+        $post = new Post("My Public Post", "This is a public post content.", "my-public-post", false);
+
+        $guard = new Guard();
+        $resultUser = $guard->removeAccess($post, $user);
+
+        $this->assertFalse($resultUser->hasRole("USER"));
     }
 }

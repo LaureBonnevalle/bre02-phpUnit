@@ -1,45 +1,40 @@
 <?php
 
 class Guard {
+
     public function giveAccess(Post $post, User $user): User {
-        if ($post->isPrivate()) {
-            if ($user->isAnonymous()) {
+        if ($post->isPrivate()===true) {
+            if ($user->hasRole("ANONYMOUS")) {
                 throw new Exception("L'utilisateur ne peut pas être anonyme.");
-            } elseif ($user->isAdmin()) {
-                // Rien ne se passe si l'utilisateur est déjà admin.
-            } else {
-                $user->setRole(User::ROLE_ADMIN);
+            } elseif ($user->hasRole("USER")) {
+                $user->addRole("ADMIN");
             }
-        } else {
-            if ($user->isAnonymous()) {
-                $user->setRole(User::ROLE_USER);
+        } elseif ($post->isPrivate()) {
+            if ($user->hasRole("ANONYMOUS")) {
+                $user->addRole("USER");
             }
-            // Rien ne se passe si l'utilisateur est déjà user ou admin.
         }
         return $user;
     }
-
+    
     public function removeAccess(Post $post, User $user): User {
-        if ($post->isPrivate()) {
-            if ($user->isAnonymous()) {
-                // Rien ne se passe si l'utilisateur est déjà anonyme.
-            } elseif ($user->isAdmin()) {
-                $user->setRole(User::ROLE_USER);
-            } else {
-                $user->setRole(User::ROLE_ANONYMOUS);
+        if ($post->isPrivate()=== true) {
+            if ($user->hasRole("USER")) {
+                $user->removeRole("USER");
+                $user->addRole("ANONYMOUS");
+            } elseif ($user->hasRole("ADMIN")) {
+                $user->removeRole("ADMIN");
+                $user->addRole("USER");
             }
-        } else {
-            if ($user->isAnonymous()) {
-                // Rien ne se passe si l'utilisateur est déjà anonyme.
-            } elseif ($user->isAdmin()) {
-                $user->setRole(User::ROLE_USER);
-            } else {
-                $user->setRole(User::ROLE_ANONYMOUS);
+        } elseif ($post->isPrivate()) {
+            if ($user->hasRole("USER")) {
+                $user->removeRole("USER");
+                $user->addRole("ANONYMOUS");
+            } elseif ($user->hasRole("ADMIN")) {
+                $user->removeRole("ADMIN");
+                $user->addRole("USER");
             }
         }
         return $user;
     }
 }
-
-
-        

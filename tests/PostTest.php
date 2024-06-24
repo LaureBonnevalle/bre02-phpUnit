@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
@@ -23,6 +24,7 @@ class PostTest extends TestCase {
         $this->expectExceptionMessage("Content cannot be empty");
         new Post("Title", "", "title-slug");
     }
+    
 
     public function testInvalidSlugThrowsException() {
         $this->expectException(Exception::class);

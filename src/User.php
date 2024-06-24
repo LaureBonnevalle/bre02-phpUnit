@@ -73,26 +73,34 @@ class User {
         $this->roles = $roles;
     }
 
-    public function addRole($newRole) {
-        if (!in_array($newRole, ["ANONYMOUS", "USER", "ADMIN"])) {
+    public function hasRole($role): bool
+    {
+        return in_array($role, $this->roles);
+    }
+
+    public function addRole($role): array
+    {
+        if (!in_array($role, ["ANONYMOUS", "USER", "ADMIN"])) {
             throw new Exception("Invalid role");
         }
-        if ($newRole !== "ANONYMOUS" && in_array("ANONYMOUS", $this->roles)) {
+        if ($role !== "ANONYMOUS" && in_array("ANONYMOUS", $this->roles)) {
             $this->roles = array_diff($this->roles, ["ANONYMOUS"]);
         }
-        if (!in_array($newRole, $this->roles)) {
-            $this->roles[] = $newRole;
+        if (!in_array($role, $this->roles)) {
+            $this->roles[] = $role;
         }
         return $this->roles;
     }
 
     public function removeRole($role) {
         if (($key = array_search($role, $this->roles)) !== false) {
-            unset($this->roles[$key]);
+            unset($this->roles[$key]); // array_diff pour remplacer : remplace ce bloc
         }
+        
         if (empty($this->roles)) {
             $this->roles[] = "ANONYMOUS";
         }
+        
         return $this->roles;
     }
 }

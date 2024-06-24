@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"PostTest::testValidPost":0.209,"PostTest::testEmptyTitle":0.035,"PostTest::testEmptyContent":0.002,"PostTest::testEmptySlug":0.001,"PostTest::testInvalidSlug":0.001}}
